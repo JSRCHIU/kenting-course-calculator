@@ -442,7 +442,7 @@ button.remove-person:hover{border-color:var(--danger);color:var(--danger)}
   <!-- 氣瓶紀錄 -->
   <div class="card">
     <div class="section-title"><span class="dot"></span>氣瓶紀錄</div>
-    <p class="hint" style="margin-bottom:1rem">一般氣瓶 70元／支　·　高氧氣瓶 100元／支</p>
+    <p class="hint" style="margin-bottom:1rem">一般氣瓶 70元／支　·　高氧氣瓶 200元／支</p>
     <div id="tank-people"></div>
     <button class="add-btn" onclick="addTankPerson()">＋ 新增使用人</button>
   </div>
@@ -450,7 +450,7 @@ button.remove-person:hover{border-color:var(--danger);color:var(--danger)}
   <!-- 保險費用 -->
   <div class="card">
     <div class="section-title"><span class="dot"></span>保險費用</div>
-    <p class="hint" style="margin-bottom:1rem">每天每位學生 100元</p>
+    <p class="hint" style="margin-bottom:1rem">每天每位學生 51元</p>
     <div class="ins-row">
       <span class="ins-eq">學生</span>
       <input type="number" id="ins-students" min="0" value="1" style="max-width:70px" oninput="updateIns()">
@@ -642,7 +642,6 @@ function removeTankDay(pi,di){tankPeople[pi].days.splice(di,1);renderTankPeople(
 
 function renderTankPeople(){
   const c=document.getElementById('tank-people');c.innerHTML='';
-  const hasNitrox=state.course==='NITROX'||state.addon;
   tankPeople.forEach((tp,i)=>{
     const d=document.createElement('div');d.className='sub-block';
     const nameOpts=[
@@ -654,7 +653,7 @@ function renderTankPeople(){
         <input type="date" value="${day.date}" onchange="tankPeople[${i}].days[${di}].date=this.value">
         <input type="number" min="1" max="20" value="${day.count}" onchange="tankPeople[${i}].days[${di}].count=parseInt(this.value)||1" style="max-width:65px">
         <span style="font-size:20px;color:var(--text-muted)">支</span>
-        ${hasNitrox?`<label class="nitrox-check"><input type="checkbox" ${day.nitrox?'checked':''} onchange="tankPeople[${i}].days[${di}].nitrox=this.checked"> 高氧瓶</label>`:''}
+        <label class="nitrox-check"><input type="checkbox" ${day.nitrox?'checked':''} onchange="tankPeople[${i}].days[${di}].nitrox=this.checked"> 高氧瓶</label>
         <button class="del-btn" onclick="removeTankDay(${i},${di})">✕</button>
       </div>`).join('');
     d.innerHTML=`
@@ -741,7 +740,6 @@ function calculate(){
   const insurance=insStudents*insDays*INS;
 
   let tankCost=0,tankLines=[];
-  const hasNitrox=state.course==='NITROX'||state.addon;
   tankPeople.forEach(tp=>{
     const name=tp.name==='__other__'?(tp.customName||'?'):tp.name;
     const parts=[];
