@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PURE DIVE — 課程費用計算機</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ocean:#0a2540;
+  --ocean-mid:#1a4060;
+  --teal:#1d8c75;
+  --teal-light:#e6f4f1;
+  --teal-mid:#9fd4c8;
+  --sand:#f5f0e8;
+  --sand-dark:#e8e0d0;
+  --text:#0a2540;
+  --text-muted:#5a7080;
+  --text-light:#8a9baa;
+  --white:#ffffff;
+  --border:#dde4ea;
+  --border-focus:#1d8c75;
+  --danger:#c0392b;
+  --radius:8px;
+  --radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--sand);
+  color:var(--text);
+  min-height:100vh;
+  font-size:23px;
+  line-height:1.6;
+}
+.page-header{
+  background:var(--ocean);
+  color:white;
+  padding:2rem 0 1.5rem;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.page-header::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 20px,
+    rgba(255,255,255,0.015) 20px,
+    rgba(255,255,255,0.015) 40px
+  );
+}
+.page-title{
+  font-family:'DM Serif Display',serif;
+  font-size:2.4rem;
+  color:white;
+  position:relative;
+  letter-spacing:.02em;
+  line-height:1.2;
+}
+.container{
+  max-width:680px;
+  margin:0 auto;
+  padding:2rem 1.25rem 4rem;
+}
+.card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;
+  margin-bottom:1.25rem;
+  box-shadow:0 1px 4px rgba(10,37,64,0.05);
+}
+.section-title{
+  font-size:20px;
+  font-weight:500;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  margin-bottom:1.25rem;
+  padding-bottom:.6rem;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.section-title .dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--teal);
+  flex-shrink:0;
+}
+.field-row{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin-bottom:1rem;
+  flex-wrap:wrap;
+}
+.field-row:last-child{margin-bottom:0}
+.field-label{
+  font-size:20px;
+  color:var(--text-muted);
+  min-width:82px;
+  flex-shrink:0;
+  padding-top:9px;
+}
+.field-label.top{padding-top:0;align-self:flex-start;padding-top:9px}
+input[type=text],input[type=number],input[type=date],select{
+  height:38px;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:white;
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-size:21px;
+  transition:border-color .15s;
+  -webkit-appearance:none;
+}
+input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,select:focus{
+  outline:none;
+  border-color:var(--border-focus);
+  box-shadow:0 0 0 3px rgba(29,140,117,0.1);
+}
+input[type=date]{cursor:pointer;min-width:145px}
+select{padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a7080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 13px;
+  border:1px solid var(--border);
+  border-radius:100px;
+  font-size:20px;
+  color:var(--text-muted);
+  cursor:pointer;
+  background:white;
+  transition:all .15s;
+  user-select:none;
+}
+.tag:hover{border-color:var(--teal);color:var(--teal)}
+.tag.active{
+  background:var(--teal);
+  border-color:var(--teal);
+  color:white;
+}
+.tag.addon-tag{
+  border-style:dashed;
+  color:var(--text-light);
+  font-size:18px;
+}
+.tag.addon-tag.active{border-style:solid}
+.hint{font-size:18px;color:var(--text-light);margin-top:3px}
+.price-hint{
+  font-size:18px;
+  color:var(--teal);
+  background:var(--teal-light);
+  padding:2px 8px;
+  border-radius:100px;
+  align-self:center;
+}
+button.add-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 14px;
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  background:transparent;
+  color:var(--text-light);
+  font-family:'DM Sans',sans-serif;
+  font-size:20px;
+  cursor:pointer;
+  margin-top:.5rem;
+  transition:all .15s;
+}
+button.add-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light)}
+button.del-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:transparent;
+  color:var(--text-light);
+  font-size:21px;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:all .15s;
+  align-self:center;
+}
+button.del-btn:hover{border-color:var(--danger);color:var(--danger);background:#fdf2f2}
+button.remove-person{
+  padding:4px 10px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:transparent;
+  color:var(--text-light);
+  font-family:'DM Sans',sans-serif;
+  font-size:18px;
+  cursor:pointer;
+  transition:all .15s;
+}
+button.remove-person:hover{border-color:var(--danger);color:var(--danger)}
+.sub-block{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem;
+  margin-bottom:.75rem;
+  background:var(--sand);
+}
+.sub-block:last-of-type{margin-bottom:0}
+.sub-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:.85rem;
+  flex-wrap:wrap;
+}
+.day-row{
+  display:flex;gap:8px;align-items:center;
+  margin-bottom:.5rem;flex-wrap:wrap;
+}
+.nitrox-check{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:20px;color:var(--text-muted);cursor:pointer;
+}
+.nitrox-check input[type=checkbox]{
+  width:15px;height:15px;accent-color:var(--teal);cursor:pointer;
+}
+.ins-row{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.ins-eq{
+  font-size:20px;color:var(--text-muted);
+}
+#ins-total{
+  font-size:23px;font-weight:500;color:var(--teal);
+  min-width:80px;
+}
+.dl-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;
+  padding:11px;
+  background:white;
+  color:var(--teal);
+  border:1.5px solid var(--teal);
+  border-radius:var(--radius-lg);
+  font-family:'DM Sans',sans-serif;
+  font-size:21px;font-weight:500;
+  cursor:pointer;
+  margin-top:1rem;
+  transition:background .15s,color .15s;
+}
+.dl-btn:hover{background:var(--teal);color:white}
+.dl-btn:active{transform:scale(0.99)}
+.calc-btn{
+  width:100%;
+  padding:14px;
+  background:var(--ocean);
+  color:white;
+  border:none;
+  border-radius:var(--radius-lg);
+  font-family:'DM Serif Display',serif;
+  font-size:18px;
+  letter-spacing:.04em;
+  cursor:pointer;
+  transition:background .2s,transform .1s;
+  margin-top:.25rem;
+}
+.calc-btn:hover{background:var(--ocean-mid)}
+.calc-btn:active{transform:scale(0.99)}
+.result-section{
+  display:none;
+  margin-top:1.5rem;
+}
+.result-header{
+  font-family:'DM Serif Display',serif;
+  font-size:33px;
+  color:var(--ocean);
+  margin-bottom:1.25rem;
+  padding-bottom:.75rem;
+  border-bottom:2px solid var(--ocean);
+}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.metric{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.25rem;
+  text-align:center;
+}
+.metric-label{font-size:18px;color:var(--text-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.metric-val{font-size:39px;font-weight:300;color:var(--text)}
+.metric-val.accent{color:var(--teal);font-weight:500}
+.result-block{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-bottom:1rem;
+}
+.result-block-title{
+  font-size:18px;font-weight:500;
+  color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:.6rem 1rem;
+  background:var(--sand);
+  border-bottom:1px solid var(--border);
+}
+.rrow{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:.55rem 1rem;
+  border-bottom:1px solid var(--border);
+  font-size:21px;color:var(--text);
+}
+.rrow:last-child{border-bottom:none}
+.rrow.subtotal{font-weight:500;background:var(--sand)}
+.rrow span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+.wage-block{
+  background:var(--ocean);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;
+  color:white;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:1rem;
+}
+.wage-label{font-size:20px;color:rgba(255,255,255,0.6);margin-bottom:4px}
+.wage-name{font-size:18px;font-weight:500;color:white}
+.wage-amount{
+  font-family:'DM Serif Display',serif;
+  font-size:54px;
+  color:var(--teal-mid);
+  white-space:nowrap;
+}
+.wage-unit{font-size:24px;color:rgba(255,255,255,0.5);margin-left:4px}
+@media(max-width:600px){
+  .page-header{padding:1.5rem 1.25rem 1.25rem}
+  .page-title{font-size:1.75rem}
+  .container{padding:1rem .85rem 3rem;max-width:100%}
+  .card{padding:1rem}
+  .field-label{min-width:72px;font-size:18px}
+  .field-row{gap:8px}
+  input[type=text],input[type=number],input[type=date],select{font-size:18px;height:38px;padding:0 8px}
+  .tags{gap:4px}
+  .tag{font-size:18px;padding:5px 12px}
+  .metrics{grid-template-columns:1fr 1fr;gap:8px}
+  .metric-val{font-size:30px}
+  .rrow{font-size:18px;padding:.5rem .85rem}
+  .result-block-title{padding:.5rem .85rem}
+  .wage-block{padding:1.1rem}
+  .wage-amount{font-size:42px}
+  .wage-name{font-size:23px}
+  .sub-block{padding:.75rem}
+  .day-row{gap:6px}
+  input[type=date]{min-width:130px}
+  .section-title{font-size:18px}
+  .calc-btn{font-size:18px;padding:12px}
+  .dl-btn{font-size:18px}
+}
+@media(max-width:380px){
+  .page-title{font-size:1.45rem}
+  .field-label{min-width:64px}
+  .metrics{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="page-title">墾丁課程費用計算機</div>
+</header>
+
+<div class="container">
+
+  <!-- 課程基本資訊 -->
+  <div class="card">
+    <div class="section-title"><span class="dot"></span>課程基本資訊</div>
+
+    <div class="field-row">
+      <span class="field-label">課程系統</span>
+      <div class="tags">
+        <span class="tag active" id="sys-PADI" onclick="setSystem('PADI',this)">PADI</span>
+        <span class="tag" id="sys-SDI" onclick="setSystem('SDI',this)">SDI</span>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">課程類別</span>
+      <div class="tags" id="course-tags"></div>
+    </div>
+
+    <div class="field-row" id="row-addons" style="display:none">
+      <span class="field-label">加購項目</span>
+      <div class="tags">
+        <span class="tag addon-tag" id="tag-addon" onclick="toggleAddon(this)">+ 加購高氧 3,000元／人</span>
+        <span class="tag addon-tag" id="tag-boat" onclick="toggleBoat(this)" style="display:none">+ 船潛升級 2,000元／人</span>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">學生人數</span>
+      <input type="number" id="student-count" min="1" max="10" value="1" style="max-width:80px" oninput="updateStudentNames()">
+    </div>
+
+    <div id="student-names"></div>
+
+    <div class="field-row" style="margin-top:1.75rem">
+      <span class="field-label top">教學教練</span>
+      <div style="flex:1">
+        <div class="tags" id="main-coach-area" style="margin-bottom:8px"></div>
+        <input type="text" id="main-coach-input" placeholder="輸入姓名後按 Enter 新增" style="max-width:220px" onkeydown="if(event.key==='Enter')addMainCoach()">
+      </div>
+    </div>
+
+    <div style="margin-top:1rem;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--sand);padding:.5rem 1rem;font-size:18px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">學費明細</div>
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:20px;color:var(--text-muted);min-width:80px">課程學費</span>
+        <input type="number" id="tuition" min="0" value="14000" style="max-width:120px" oninput="updateTuitionSummary()">
+        <span style="font-size:20px;color:var(--text-muted)">元／人</span>
+        <span class="price-hint" id="tuition-hint">預設 14,000 元</span>
+      </div>
+      <div id="row-addon-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:20px;color:var(--text-muted);min-width:80px">加購高氧</span>
+          <input type="number" id="addon-fee" min="0" value="3000" style="max-width:120px" oninput="updateTuitionSummary()">
+          <span style="font-size:20px;color:var(--text-muted)">元／人</span>
+        </div>
+      </div>
+      <div id="row-boat-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:20px;color:var(--text-muted);min-width:80px">船潛升級</span>
+          <input type="number" id="boat-fee" min="0" value="2000" style="max-width:120px" oninput="updateTuitionSummary()">
+          <span style="font-size:20px;color:var(--text-muted)">元／人</span>
+        </div>
+      </div>
+      <div style="padding:.75rem 1rem;background:var(--sand);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:20px;color:var(--text-muted)" id="tuition-people-label">× 1 人</span>
+        <span style="font-size:23px;font-weight:500;color:var(--teal)" id="tuition-subtotal">14,000 元</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 氣瓶紀錄 -->
+  <div class="card">
+    <div class="section-title"><span class="dot"></span>氣瓶紀錄</div>
+    <p class="hint" style="margin-bottom:1rem">一般氣瓶 70元／支　·　高氧氣瓶 100元／支</p>
+    <div id="tank-people"></div>
+    <button class="add-btn" onclick="addTankPerson()">＋ 新增使用人</button>
+  </div>
+
+  <!-- 保險費用 -->
+  <div class="card">
+    <div class="section-title"><span class="dot"></span>保險費用</div>
+    <p class="hint" style="margin-bottom:1rem">每天每位學生 100元</p>
+    <div class="ins-row">
+      <span class="ins-eq">學生</span>
+      <input type="number" id="ins-students" min="0" value="1" style="max-width:70px" oninput="updateIns()">
+      <span class="ins-eq">人　×</span>
+      <input type="number" id="ins-days" min="0" value="1" style="max-width:65px" oninput="updateIns()">
+      <span class="ins-eq">天　＝</span>
+      <span id="ins-total">100 元</span>
+    </div>
+  </div>
+
+  <!-- 跟課教練 -->
+  <div class="card">
+    <div class="section-title"><span class="dot"></span>跟課教練</div>
+    <p class="hint" style="margin-bottom:1rem">平靜水域 600元／人次　·　開放水域 500元／支</p>
+    <div id="assist-coaches"></div>
+    <button class="add-btn" onclick="addAssistCoach()">＋ 新增跟課教練</button>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">計算工資與費用</button>
+
+  <!-- 結算結果 -->
+  <div class="result-section" id="result-section">
+    <div class="result-header" id="result-title">費用結算</div>
+    <div class="metrics" id="result-metrics"></div>
+    <div id="result-income"></div>
+    <div id="result-cost"></div>
+    <div id="result-wage"></div>
+    <button class="dl-btn" id="dl-btn" onclick="downloadJPG()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M8 1v9M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      下載 JPG
+    </button>
+  </div>
+
+</div>
+
+<script>
+const PRESETS={
+  PADI:{
+    OW:{label:'OW 初階潛水員',tuition:14000,material:2600},
+    AOW:{label:'AOW 進階潛水員',tuition:13000,material:2760},
+    NITROX:{label:'高氧潛水員',tuition:6000,material:1860}
+  },
+  SDI:{
+    OW:{label:'OW 初階潛水員',tuition:12000,material:1260},
+    AOW:{label:'AOW 進階潛水員',tuition:11000,material:1260},
+    NITROX:{label:'高氧潛水員',tuition:5000,material:1500}
+  }
+};
+const NITROX_ADDON=3000,BOAT_ADD=2000,BOAT_COST=1600;
+const TANK_N=70,TANK_NX=200,INS=51,CALM=600,OPEN=500;
+
+let state={system:'PADI',course:'OW',addon:false,boat:false};
+let people=['米','洲','銘'];
+let mainCoaches=[];
+let assistCoaches=[];
+let tankPeople=[];
+
+function setSystem(s,el){
+  state.system=s;
+  ['PADI','SDI'].forEach(x=>document.getElementById('sys-'+x).classList.remove('active'));
+  el.classList.add('active');
+  renderCourses();updateTuition();renderAddon();renderBoat();
+}
+
+function renderCourses(){
+  const ct=document.getElementById('course-tags');ct.innerHTML='';
+  ['OW','AOW','NITROX'].forEach(k=>{
+    const t=document.createElement('span');
+    t.className='tag'+(state.course===k?' active':'');
+    t.textContent=PRESETS[state.system][k].label;
+    t.onclick=()=>{state.course=k;renderCourses();updateTuition();renderAddon();renderBoat();};
+    ct.appendChild(t);
+  });
+}
+
+function renderAddon(){
+  // show the whole addons row if course is not NITROX (addon) or is AOW (boat)
+  const showAddon=state.course!=='NITROX';
+  const showBoat=state.course==='AOW';
+  const showRow=showAddon||showBoat;
+  document.getElementById('row-addons').style.display=showRow?'flex':'none';
+  document.getElementById('tag-addon').style.display=showAddon?'':'none';
+  if(!showAddon){
+    state.addon=false;
+    document.getElementById('tag-addon').classList.remove('active');
+    document.getElementById('row-addon-fee').style.display='none';
+  }
+}
+
+function renderBoat(){
+  const showBoat=state.course==='AOW';
+  document.getElementById('tag-boat').style.display=showBoat?'':'none';
+  if(!showBoat){
+    state.boat=false;
+    document.getElementById('tag-boat').classList.remove('active');
+    document.getElementById('row-boat-fee').style.display='none';
+  }
+  updateTuitionSummary();
+}
+
+function toggleAddon(el){
+  state.addon=!state.addon;
+  el.classList.toggle('active');
+  const row=document.getElementById('row-addon-fee');
+  if(row) row.style.display=state.addon?'block':'none';
+  updateTuitionSummary();
+}
+function toggleBoat(el){
+  state.boat=!state.boat;
+  el.classList.toggle('active');
+  const row=document.getElementById('row-boat-fee');
+  if(row) row.style.display=state.boat?'block':'none';
+  updateTuitionSummary();
+}
+
+function updateTuition(){
+  const base=PRESETS[state.system][state.course].tuition;
+  document.getElementById('tuition').value=base;
+  document.getElementById('tuition-hint').textContent='預設 '+base.toLocaleString()+' 元';
+  // reset addon/boat fee rows visibility
+  const addonRow=document.getElementById('row-addon-fee');
+  const boatRow=document.getElementById('row-boat-fee');
+  if(addonRow) addonRow.style.display='none';
+  if(boatRow) boatRow.style.display='none';
+  updateTuitionSummary();
+}
+
+function updateTuitionSummary(){
+  const n=parseInt(document.getElementById('student-count').value)||1;
+  const tuition=parseInt(document.getElementById('tuition').value)||0;
+  const addonFee=state.addon?(parseInt(document.getElementById('addon-fee').value)||0):0;
+  const boatFee=state.boat?(parseInt(document.getElementById('boat-fee').value)||0):0;
+  const total=(tuition+addonFee+boatFee)*n;
+  const lbl=document.getElementById('tuition-people-label');
+  const sub=document.getElementById('tuition-subtotal');
+  if(lbl) lbl.textContent='× '+n+' 人';
+  if(sub) sub.textContent=total.toLocaleString()+' 元';
+}
+
+function updateStudentNames(){
+  const n=parseInt(document.getElementById('student-count').value)||1;
+  const c=document.getElementById('student-names');
+  const existing=[...c.querySelectorAll('input[data-sname]')].map(e=>e.value);
+  c.innerHTML='';
+  for(let i=0;i<n;i++){
+    const row=document.createElement('div');row.className='field-row';
+    row.innerHTML=`<span class="field-label">學生 ${i+1} 姓名</span><input type="text" data-sname="${i}" placeholder="姓名" value="${existing[i]||''}" style="max-width:180px">`;
+    c.appendChild(row);
+  }
+  updateTuitionSummary();
+}
+
+function addMainCoach(){
+  const inp=document.getElementById('main-coach-input');
+  const name=inp.value.trim();if(!name)return;
+  if(!people.includes(name))people.push(name);
+  mainCoaches=[name];inp.value='';renderMainCoach();
+}
+
+function removePerson(name){
+  people=people.filter(x=>x!==name);
+  if(mainCoaches.includes(name))mainCoaches=[];
+  renderMainCoach();
+}
+function renderMainCoach(){
+  const area=document.getElementById('main-coach-area');area.innerHTML='';
+  people.forEach(p=>{
+    const t=document.createElement('span');
+    t.className='tag'+(mainCoaches.includes(p)?' active':'');
+    const label=document.createTextNode(p);
+    t.appendChild(label);
+    t.onclick=(e)=>{if(e.target.dataset.rm)return;mainCoaches=[p];renderMainCoach();};
+    const x=document.createElement('span');
+    x.dataset.rm='1';
+    x.textContent=' ✕';
+    x.style.cssText='font-size:10px;opacity:0.55;cursor:pointer;margin-left:2px;';
+    x.onclick=(e)=>{e.stopPropagation();removePerson(p);};
+    t.appendChild(x);
+    area.appendChild(t);
+  });
+}
+
+function addTankPerson(){
+  tankPeople.push({name:people[0],customName:'',days:[]});renderTankPeople();
+}
+function removeTankPerson(i){tankPeople.splice(i,1);renderTankPeople();}
+function addTankDay(i){tankPeople[i].days.push({date:'',count:1,nitrox:false});renderTankPeople();}
+function removeTankDay(pi,di){tankPeople[pi].days.splice(di,1);renderTankPeople();}
+
+function renderTankPeople(){
+  const c=document.getElementById('tank-people');c.innerHTML='';
+  const hasNitrox=state.course==='NITROX'||state.addon;
+  tankPeople.forEach((tp,i)=>{
+    const d=document.createElement('div');d.className='sub-block';
+    const nameOpts=[
+      ...people.map(p=>`<option value="${p}" ${tp.name===p?'selected':''}>${p}</option>`),
+      `<option value="__other__" ${tp.name==='__other__'?'selected':''}>其他…</option>`
+    ].join('');
+    const daysHTML=(tp.days||[]).map((day,di)=>`
+      <div class="day-row">
+        <input type="date" value="${day.date}" onchange="tankPeople[${i}].days[${di}].date=this.value">
+        <input type="number" min="1" max="20" value="${day.count}" onchange="tankPeople[${i}].days[${di}].count=parseInt(this.value)||1" style="max-width:65px">
+        <span style="font-size:20px;color:var(--text-muted)">支</span>
+        ${hasNitrox?`<label class="nitrox-check"><input type="checkbox" ${day.nitrox?'checked':''} onchange="tankPeople[${i}].days[${di}].nitrox=this.checked"> 高氧瓶</label>`:''}
+        <button class="del-btn" onclick="removeTankDay(${i},${di})">✕</button>
+      </div>`).join('');
+    d.innerHTML=`
+      <div class="sub-header">
+        <span style="font-size:20px;color:var(--text-muted);font-weight:500">使用人</span>
+        <select onchange="tankPeople[${i}].name=this.value;renderTankPeople()" style="max-width:120px">${nameOpts}</select>
+        ${tp.name==='__other__'?`<input type="text" placeholder="輸入姓名" value="${tp.customName||''}" onchange="tankPeople[${i}].customName=this.value" style="max-width:110px">`:''}
+        <button class="remove-person" onclick="removeTankPerson(${i})">移除</button>
+      </div>
+      ${daysHTML}
+      <button class="add-btn" onclick="addTankDay(${i})">＋ 新增日期及支數</button>`;
+    c.appendChild(d);
+  });
+}
+
+function addAssistCoach(){
+  assistCoaches.push({name:people[0],customName:'',calm:0,open:0});renderAssistCoaches();
+}
+function removeAssistCoach(i){assistCoaches.splice(i,1);renderAssistCoaches();}
+
+function renderAssistCoaches(){
+  const c=document.getElementById('assist-coaches');c.innerHTML='';
+  assistCoaches.forEach((ac,i)=>{
+    const d=document.createElement('div');d.className='sub-block';
+    const nameOpts=[
+      ...people.map(p=>`<option value="${p}" ${ac.name===p?'selected':''}>${p}</option>`),
+      `<option value="__other__" ${ac.name==='__other__'?'selected':''}>其他…</option>`
+    ].join('');
+    d.innerHTML=`
+      <div class="sub-header">
+        <span style="font-size:20px;color:var(--text-muted);font-weight:500">跟課教練</span>
+        <select onchange="assistCoaches[${i}].name=this.value;renderAssistCoaches()" style="max-width:120px">${nameOpts}</select>
+        ${ac.name==='__other__'?`<input type="text" placeholder="輸入姓名" value="${ac.customName||''}" onchange="assistCoaches[${i}].customName=this.value" style="max-width:110px">`:''}
+        <button class="remove-person" onclick="removeAssistCoach(${i})">移除</button>
+      </div>
+      <div class="day-row" style="margin-bottom:.5rem">
+        <span style="font-size:20px;color:var(--text-muted);min-width:70px">平靜水域</span>
+        <input type="number" min="0" value="${ac.calm}" onchange="assistCoaches[${i}].calm=parseInt(this.value)||0" style="max-width:75px">
+        <span style="font-size:20px;color:var(--text-muted)">人次　×　600元</span>
+      </div>
+      <div class="day-row">
+        <span style="font-size:20px;color:var(--text-muted);min-width:70px">開放水域</span>
+        <input type="number" min="0" value="${ac.open}" onchange="assistCoaches[${i}].open=parseInt(this.value)||0" style="max-width:75px">
+        <span style="font-size:20px;color:var(--text-muted)">支　×　500元</span>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+
+function updateIns(){
+  const s=parseInt(document.getElementById('ins-students').value)||0;
+  const d=parseInt(document.getElementById('ins-days').value)||0;
+  document.getElementById('ins-total').textContent=(s*d*INS).toLocaleString()+' 元';
+}
+
+function fmtDate(d){
+  if(!d)return'—';
+  const p=d.split('-');
+  return p.length===3?`${parseInt(p[1])}/${parseInt(p[2])}`:d;
+}
+
+function rrow(label,val,cls=''){
+  return `<div class="rrow ${cls}"><span>${label}</span><span>${val}</span></div>`;
+}
+
+function calculate(){
+  const preset=PRESETS[state.system][state.course];
+  const tuition=parseInt(document.getElementById('tuition').value)||preset.tuition;
+  const studentCount=parseInt(document.getElementById('student-count').value)||1;
+  const insStudents=parseInt(document.getElementById('ins-students').value)||0;
+  const insDays=parseInt(document.getElementById('ins-days').value)||0;
+  const snames=[...document.querySelectorAll('[data-sname]')].map((e,i)=>e.value||`學生${i+1}`);
+
+  const totalTuition=tuition*studentCount;
+  const addonFeeVal=state.addon?(parseInt(document.getElementById('addon-fee').value)||NITROX_ADDON):0;
+  const addonTotal=state.addon?addonFeeVal*studentCount:0;
+  const boatFeeVal=state.boat?(parseInt(document.getElementById('boat-fee').value)||BOAT_ADD):0;
+  const boatAdd=state.boat?boatFeeVal*studentCount:0;
+  const boatCost=state.boat?BOAT_COST*studentCount:0;
+  const income=totalTuition+addonTotal+boatAdd;
+
+  const material=preset.material;
+  const nitroxMat=(state.addon&&state.course!=='NITROX')?PRESETS[state.system]['NITROX'].material:0;
+  const insurance=insStudents*insDays*INS;
+
+  let tankCost=0,tankLines=[];
+  const hasNitrox=state.course==='NITROX'||state.addon;
+  tankPeople.forEach(tp=>{
+    const name=tp.name==='__other__'?(tp.customName||'?'):tp.name;
+    const parts=[];
+    (tp.days||[]).forEach(day=>{
+      const price=(day.nitrox||state.course==='NITROX')?TANK_NX:TANK_N;
+      tankCost+=day.count*price;
+      parts.push(`${fmtDate(day.date)} ${day.count}支${day.nitrox?' (高氧)':''}`);
+    });
+    if(parts.length)tankLines.push(`${name}：${parts.join('、')}`);
+  });
+
+  let assistTotal=0,assistData=[];
+  assistCoaches.forEach(ac=>{
+    const name=ac.name==='__other__'?(ac.customName||'教練'):ac.name;
+    const fee=ac.calm*CALM+ac.open*OPEN;
+    assistTotal+=fee;
+    assistData.push({name,calm:ac.calm,open:ac.open,fee});
+  });
+
+  const totalCost=material+nitroxMat+insurance+tankCost+assistTotal+boatCost;
+  const net=income-totalCost;
+  const mainWage=Math.round(Math.max(net,0)*0.6);
+  const mainName=mainCoaches[0]||'教學教練';
+
+  // render
+  document.getElementById('result-title').textContent=
+    `${state.system} ${preset.label}　${snames.join('、')}`;
+
+  document.getElementById('result-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">總收入</div><div class="metric-val">${income.toLocaleString()}</div></div>
+    <div class="metric"><div class="metric-label">${mainName} 工資</div><div class="metric-val accent">${mainWage.toLocaleString()}</div></div>`;
+
+  document.getElementById('result-income').innerHTML=`
+    <div class="result-block">
+      <div class="result-block-title">收入明細</div>
+      ${rrow(`學費（${snames.join('、')}）× ${studentCount} 人`,totalTuition.toLocaleString()+' 元')}
+      ${addonTotal?rrow(`加購項目：高氧 × ${studentCount} 人`,addonTotal.toLocaleString()+' 元'):''}
+      ${boatAdd?rrow(`加購項目：船潛升級 × ${studentCount} 人`,boatAdd.toLocaleString()+' 元'):''}
+      ${rrow('收入合計',income.toLocaleString()+' 元','subtotal')}
+    </div>`;
+
+  document.getElementById('result-cost').innerHTML=`
+    <div class="result-block">
+      <div class="result-block-title">成本明細</div>
+      ${rrow(`教材（${state.system} ${preset.label}）`,material.toLocaleString()+' 元')}
+      ${nitroxMat?rrow('高氧教材',nitroxMat.toLocaleString()+' 元'):''}
+      ${rrow('氣瓶'+(tankLines.length?' — '+tankLines.join(' ／ '):''),(tankCost||0).toLocaleString()+' 元')}
+      ${rrow(`保險（${insStudents}人 × ${insDays}天）`,insurance.toLocaleString()+' 元')}
+      ${assistData.map(a=>rrow(
+        `跟課：${a.name}（平靜 ${a.calm} 人次＋開放 ${a.open} 支）`,
+        a.fee.toLocaleString()+' 元'
+      )).join('')}
+      ${boatCost?rrow(`船潛成本 × ${studentCount} 人`,boatCost.toLocaleString()+' 元'):''}
+      ${rrow('成本合計',totalCost.toLocaleString()+' 元','subtotal')}
+      ${rrow('淨利（收入 − 成本）',net.toLocaleString()+' 元')}
+    </div>`;
+
+  document.getElementById('result-wage').innerHTML=`
+    <div class="wage-block">
+      <div>
+        <div class="wage-label">教學教練工資（淨利 × 60%）</div>
+        <div class="wage-name">${mainName}</div>
+      </div>
+      <div>
+        <span class="wage-amount">${mainWage.toLocaleString()}</span>
+        <span class="wage-unit">元</span>
+      </div>
+    </div>`;
+
+  const rs=document.getElementById('result-section');
+  rs.style.display='block';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// init
+renderCourses();updateTuition();renderAddon();renderBoat();renderMainCoach();updateStudentNames();updateIns();updateTuitionSummary();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function downloadJPG(){
+  const btn=document.getElementById('dl-btn');
+  const target=document.getElementById('result-section');
+  const orig=btn.textContent;
+  btn.style.display='none';
+
+  const pad=24;
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText=`position:fixed;left:-9999px;top:0;background:#f5f0e8;padding:${pad}px;width:${target.offsetWidth+pad*2}px;font-family:'DM Sans',sans-serif;`;
+  const clone=target.cloneNode(true);
+  clone.style.cssText='display:block;';
+  clone.querySelector('#dl-btn') && (clone.querySelector('#dl-btn').style.display='none');
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  html2canvas(wrapper,{
+    scale:2,
+    useCORS:true,
+    backgroundColor:'#f5f0e8',
+    logging:false
+  }).then(canvas=>{
+    document.body.removeChild(wrapper);
+    btn.style.display='';
+    const link=document.createElement('a');
+    const title=(document.getElementById('result-title').textContent||'結算').replace(/\s+/g,'_');
+    link.download=`PURE_DIVE_${title}.jpg`;
+    link.href=canvas.toDataURL('image/jpeg',0.95);
+    link.click();
+  }).catch(()=>{
+    document.body.removeChild(wrapper);
+    btn.style.display='';
+  });
+}
+</script>
+-e 
+</body>
+</html>
