@@ -390,8 +390,8 @@ button.remove-person:hover{border-color:var(--danger);color:var(--danger)}
     <div class="field-row" id="row-addons" style="display:none">
       <span class="field-label">加購項目</span>
       <div class="tags">
-        <span class="tag addon-tag" id="tag-addon" onclick="toggleAddon(this)">+ 加購高氧 3,000元／人</span>
-        <span class="tag addon-tag" id="tag-boat" onclick="toggleBoat(this)" style="display:none">+ 船潛升級 2,000元／人</span>
+        <span class="tag addon-tag" id="tag-padi-nitrox" onclick="toggleAddonPADI(this)">+ 加購PADI高氧 3,800元／人</span>
+        <span class="tag addon-tag" id="tag-sdi-nitrox" onclick="toggleAddonSDI(this)">+ 加購SDI高氧 3,000元／人</span>
       </div>
     </div>
 
@@ -418,17 +418,17 @@ button.remove-person:hover{border-color:var(--danger);color:var(--danger)}
         <span style="font-size:20px;color:var(--text-muted)">元／人</span>
         <span class="price-hint" id="tuition-hint">預設 14,000 元</span>
       </div>
-      <div id="row-addon-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+      <div id="row-padi-nitrox-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:20px;color:var(--text-muted);min-width:80px">加購高氧</span>
-          <input type="number" id="addon-fee" min="0" value="3000" style="max-width:120px" oninput="updateTuitionSummary()">
+          <span style="font-size:20px;color:var(--text-muted);min-width:100px">加購PADI高氧</span>
+          <input type="number" id="padi-nitrox-fee" min="0" value="3800" style="max-width:120px" oninput="updateTuitionSummary()">
           <span style="font-size:20px;color:var(--text-muted)">元／人</span>
         </div>
       </div>
-      <div id="row-boat-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+      <div id="row-sdi-nitrox-fee" style="display:none;padding:.75rem 1rem;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:20px;color:var(--text-muted);min-width:80px">船潛升級</span>
-          <input type="number" id="boat-fee" min="0" value="2000" style="max-width:120px" oninput="updateTuitionSummary()">
+          <span style="font-size:20px;color:var(--text-muted);min-width:100px">加購SDI高氧</span>
+          <input type="number" id="sdi-nitrox-fee" min="0" value="3000" style="max-width:120px" oninput="updateTuitionSummary()">
           <span style="font-size:20px;color:var(--text-muted)">元／人</span>
         </div>
       </div>
@@ -499,10 +499,10 @@ const PRESETS={
     NITROX:{label:'高氧潛水員',tuition:5000,material:1500}
   }
 };
-const NITROX_ADDON=3000,BOAT_ADD=2000,BOAT_COST=1600;
+const NITROX_ADDON_PADI=3800,NITROX_ADDON_SDI=3000;
 const TANK_N=70,TANK_NX=200,INS=51,CALM=600,OPEN=500;
 
-let state={system:'PADI',course:'OW',addon:false,boat:false};
+let state={system:'PADI',course:'OW',addonPADI:false,addonSDI:false};
 let people=['米','洲','銘'];
 let mainCoaches=[];
 let assistCoaches=[];
@@ -512,7 +512,7 @@ function setSystem(s,el){
   state.system=s;
   ['PADI','SDI'].forEach(x=>document.getElementById('sys-'+x).classList.remove('active'));
   el.classList.add('active');
-  renderCourses();updateTuition();renderAddon();renderBoat();
+  renderCourses();updateTuition();renderAddon();
 }
 
 function renderCourses(){
@@ -527,63 +527,53 @@ function renderCourses(){
 }
 
 function renderAddon(){
-  // show the whole addons row if course is not NITROX (addon) or is AOW (boat)
   const showAddon=state.course!=='NITROX';
-  const showBoat=state.course==='AOW';
-  const showRow=showAddon||showBoat;
-  document.getElementById('row-addons').style.display=showRow?'flex':'none';
-  document.getElementById('tag-addon').style.display=showAddon?'':'none';
+  document.getElementById('row-addons').style.display=showAddon?'flex':'none';
   if(!showAddon){
-    state.addon=false;
-    document.getElementById('tag-addon').classList.remove('active');
-    document.getElementById('row-addon-fee').style.display='none';
-  }
-}
-
-function renderBoat(){
-  const showBoat=state.course==='AOW';
-  document.getElementById('tag-boat').style.display=showBoat?'':'none';
-  if(!showBoat){
-    state.boat=false;
-    document.getElementById('tag-boat').classList.remove('active');
-    document.getElementById('row-boat-fee').style.display='none';
+    state.addonPADI=false;state.addonSDI=false;
+    document.getElementById('tag-padi-nitrox').classList.remove('active');
+    document.getElementById('tag-sdi-nitrox').classList.remove('active');
+    document.getElementById('row-padi-nitrox-fee').style.display='none';
+    document.getElementById('row-sdi-nitrox-fee').style.display='none';
   }
   updateTuitionSummary();
 }
 
-function toggleAddon(el){
-  state.addon=!state.addon;
+function renderBoat(){}
+
+function toggleAddonPADI(el){
+  state.addonPADI=!state.addonPADI;
   el.classList.toggle('active');
-  const row=document.getElementById('row-addon-fee');
-  if(row) row.style.display=state.addon?'block':'none';
+  document.getElementById('row-padi-nitrox-fee').style.display=state.addonPADI?'block':'none';
   updateTuitionSummary();
 }
-function toggleBoat(el){
-  state.boat=!state.boat;
+function toggleAddonSDI(el){
+  state.addonSDI=!state.addonSDI;
   el.classList.toggle('active');
-  const row=document.getElementById('row-boat-fee');
-  if(row) row.style.display=state.boat?'block':'none';
+  document.getElementById('row-sdi-nitrox-fee').style.display=state.addonSDI?'block':'none';
   updateTuitionSummary();
 }
+function toggleBoat(el){}
 
 function updateTuition(){
   const base=PRESETS[state.system][state.course].tuition;
   document.getElementById('tuition').value=base;
   document.getElementById('tuition-hint').textContent='預設 '+base.toLocaleString()+' 元';
-  // reset addon/boat fee rows visibility
-  const addonRow=document.getElementById('row-addon-fee');
-  const boatRow=document.getElementById('row-boat-fee');
-  if(addonRow) addonRow.style.display='none';
-  if(boatRow) boatRow.style.display='none';
+  // reset addon fee rows
+  state.addonPADI=false;state.addonSDI=false;
+  document.getElementById('tag-padi-nitrox').classList.remove('active');
+  document.getElementById('tag-sdi-nitrox').classList.remove('active');
+  document.getElementById('row-padi-nitrox-fee').style.display='none';
+  document.getElementById('row-sdi-nitrox-fee').style.display='none';
   updateTuitionSummary();
 }
 
 function updateTuitionSummary(){
   const n=parseInt(document.getElementById('student-count').value)||1;
   const tuition=parseInt(document.getElementById('tuition').value)||0;
-  const addonFee=state.addon?(parseInt(document.getElementById('addon-fee').value)||0):0;
-  const boatFee=state.boat?(parseInt(document.getElementById('boat-fee').value)||0):0;
-  const total=(tuition+addonFee+boatFee)*n;
+  const padiNitroxFee=state.addonPADI?(parseInt(document.getElementById('padi-nitrox-fee').value)||0):0;
+  const sdiNitroxFee=state.addonSDI?(parseInt(document.getElementById('sdi-nitrox-fee').value)||0):0;
+  const total=(tuition+padiNitroxFee+sdiNitroxFee)*n;
   const lbl=document.getElementById('tuition-people-label');
   const sub=document.getElementById('tuition-subtotal');
   if(lbl) lbl.textContent='× '+n+' 人';
@@ -728,15 +718,15 @@ function calculate(){
   const snames=[...document.querySelectorAll('[data-sname]')].map((e,i)=>e.value||`學生${i+1}`);
 
   const totalTuition=tuition*studentCount;
-  const addonFeeVal=state.addon?(parseInt(document.getElementById('addon-fee').value)||NITROX_ADDON):0;
-  const addonTotal=state.addon?addonFeeVal*studentCount:0;
-  const boatFeeVal=state.boat?(parseInt(document.getElementById('boat-fee').value)||BOAT_ADD):0;
-  const boatAdd=state.boat?boatFeeVal*studentCount:0;
-  const boatCost=state.boat?BOAT_COST*studentCount:0;
-  const income=totalTuition+addonTotal+boatAdd;
+  const padiNitroxVal=state.addonPADI?(parseInt(document.getElementById('padi-nitrox-fee').value)||NITROX_ADDON_PADI):0;
+  const sdiNitroxVal=state.addonSDI?(parseInt(document.getElementById('sdi-nitrox-fee').value)||NITROX_ADDON_SDI):0;
+  const addonTotal=(padiNitroxVal+sdiNitroxVal)*studentCount;
+  const income=totalTuition+addonTotal;
 
   const material=preset.material;
-  const nitroxMat=(state.addon&&state.course!=='NITROX')?PRESETS[state.system]['NITROX'].material:0;
+  const nitroxMatPADI=state.addonPADI?PRESETS['PADI']['NITROX'].material:0;
+  const nitroxMatSDI=state.addonSDI?PRESETS['SDI']['NITROX'].material:0;
+  const nitroxMat=nitroxMatPADI+nitroxMatSDI;
   const insurance=insStudents*insDays*INS;
 
   let tankCost=0,tankLines=[];
@@ -759,7 +749,7 @@ function calculate(){
     assistData.push({name,calm:ac.calm,open:ac.open,fee});
   });
 
-  const totalCost=material+nitroxMat+insurance+tankCost+assistTotal+boatCost;
+  const totalCost=material+nitroxMat+insurance+tankCost+assistTotal;
   const net=income-totalCost;
   const mainWage=Math.round(Math.max(net,0)*0.6);
   const mainName=mainCoaches[0]||'教學教練';
@@ -776,8 +766,8 @@ function calculate(){
     <div class="result-block">
       <div class="result-block-title">收入明細</div>
       ${rrow(`學費（${snames.join('、')}）× ${studentCount} 人`,totalTuition.toLocaleString()+' 元')}
-      ${addonTotal?rrow(`加購項目：高氧 × ${studentCount} 人`,addonTotal.toLocaleString()+' 元'):''}
-      ${boatAdd?rrow(`加購項目：船潛升級 × ${studentCount} 人`,boatAdd.toLocaleString()+' 元'):''}
+      ${state.addonPADI?rrow(`加購PADI高氧 × ${studentCount} 人`,(padiNitroxVal*studentCount).toLocaleString()+' 元'):''}
+      ${state.addonSDI?rrow(`加購SDI高氧 × ${studentCount} 人`,(sdiNitroxVal*studentCount).toLocaleString()+' 元'):''}
       ${rrow('收入合計',income.toLocaleString()+' 元','subtotal')}
     </div>`;
 
@@ -785,14 +775,14 @@ function calculate(){
     <div class="result-block">
       <div class="result-block-title">成本明細</div>
       ${rrow(`教材（${state.system} ${preset.label}）`,material.toLocaleString()+' 元')}
-      ${nitroxMat?rrow('高氧教材',nitroxMat.toLocaleString()+' 元'):''}
+      ${nitroxMatPADI?rrow('PADI高氧教材',nitroxMatPADI.toLocaleString()+' 元'):''}
+      ${nitroxMatSDI?rrow('SDI高氧教材',nitroxMatSDI.toLocaleString()+' 元'):''}
       ${rrow('氣瓶'+(tankLines.length?' — '+tankLines.join(' ／ '):''),(tankCost||0).toLocaleString()+' 元')}
       ${rrow(`保險（${insStudents}人 × ${insDays}天）`,insurance.toLocaleString()+' 元')}
       ${assistData.map(a=>rrow(
         `跟課：${a.name}（平靜 ${a.calm} 人次＋開放 ${a.open} 支）`,
         a.fee.toLocaleString()+' 元'
       )).join('')}
-      ${boatCost?rrow(`船潛成本 × ${studentCount} 人`,boatCost.toLocaleString()+' 元'):''}
       ${rrow('成本合計',totalCost.toLocaleString()+' 元','subtotal')}
       ${rrow('淨利（收入 − 成本）',net.toLocaleString()+' 元')}
     </div>`;
