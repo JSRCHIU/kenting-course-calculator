@@ -810,6 +810,18 @@ function calculate(){
   const rs=document.getElementById('result-section');
   rs.style.display='block';
   rs.scrollIntoView({behavior:'smooth',block:'start'});
+
+  window.parent.postMessage({
+    type:'wageResult',
+    wage:mainWage,
+    coachName:mainName,
+    detail:{
+      title:document.getElementById('result-title').textContent,
+      income:income,
+      cost:totalCost,
+      net:net
+    }
+  },'*');
 }
 
 // init
