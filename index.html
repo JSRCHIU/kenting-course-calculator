@@ -542,15 +542,23 @@ function renderAddon(){
 function renderBoat(){}
 
 function toggleAddonPADI(el){
-  state.addonPADI=!state.addonPADI;
-  el.classList.toggle('active');
-  document.getElementById('row-padi-nitrox-fee').style.display=state.addonPADI?'block':'none';
+  const selecting=!state.addonPADI;
+  state.addonSDI=false;
+  document.getElementById('tag-sdi-nitrox').classList.remove('active');
+  document.getElementById('row-sdi-nitrox-fee').style.display='none';
+  state.addonPADI=selecting;
+  el.classList.toggle('active',selecting);
+  document.getElementById('row-padi-nitrox-fee').style.display=selecting?'block':'none';
   updateTuitionSummary();
 }
 function toggleAddonSDI(el){
-  state.addonSDI=!state.addonSDI;
-  el.classList.toggle('active');
-  document.getElementById('row-sdi-nitrox-fee').style.display=state.addonSDI?'block':'none';
+  const selecting=!state.addonSDI;
+  state.addonPADI=false;
+  document.getElementById('tag-padi-nitrox').classList.remove('active');
+  document.getElementById('row-padi-nitrox-fee').style.display='none';
+  state.addonSDI=selecting;
+  el.classList.toggle('active',selecting);
+  document.getElementById('row-sdi-nitrox-fee').style.display=selecting?'block':'none';
   updateTuitionSummary();
 }
 function toggleBoat(el){}
@@ -723,9 +731,9 @@ function calculate(){
   const addonTotal=(padiNitroxVal+sdiNitroxVal)*studentCount;
   const income=totalTuition+addonTotal;
 
-  const material=preset.material;
-  const nitroxMatPADI=state.addonPADI?PRESETS['PADI']['NITROX'].material:0;
-  const nitroxMatSDI=state.addonSDI?PRESETS['SDI']['NITROX'].material:0;
+  const material=preset.material*studentCount;
+  const nitroxMatPADI=state.addonPADI?PRESETS['PADI']['NITROX'].material*studentCount:0;
+  const nitroxMatSDI=state.addonSDI?PRESETS['SDI']['NITROX'].material*studentCount:0;
   const nitroxMat=nitroxMatPADI+nitroxMatSDI;
   const insurance=insStudents*insDays*INS;
 
@@ -774,9 +782,9 @@ function calculate(){
   document.getElementById('result-cost').innerHTML=`
     <div class="result-block">
       <div class="result-block-title">成本明細</div>
-      ${rrow(`教材（${state.system} ${preset.label}）`,material.toLocaleString()+' 元')}
-      ${nitroxMatPADI?rrow('PADI高氧教材',nitroxMatPADI.toLocaleString()+' 元'):''}
-      ${nitroxMatSDI?rrow('SDI高氧教材',nitroxMatSDI.toLocaleString()+' 元'):''}
+      ${rrow(`教材（${state.system} ${preset.label}）× ${studentCount} 人`,material.toLocaleString()+' 元')}
+      ${nitroxMatPADI?rrow(`PADI高氧教材 × ${studentCount} 人`,nitroxMatPADI.toLocaleString()+' 元'):''}
+      ${nitroxMatSDI?rrow(`SDI高氧教材 × ${studentCount} 人`,nitroxMatSDI.toLocaleString()+' 元'):''}
       ${rrow('氣瓶'+(tankLines.length?' — '+tankLines.join(' ／ '):''),(tankCost||0).toLocaleString()+' 元')}
       ${rrow(`保險（${insStudents}人 × ${insDays}天）`,insurance.toLocaleString()+' 元')}
       ${assistData.map(a=>rrow(
