@@ -820,7 +820,6 @@ renderCourses();updateTuition();renderAddon();renderBoat();renderMainCoach();upd
 function downloadJPG(){
   const btn=document.getElementById('dl-btn');
   const target=document.getElementById('result-section');
-  const orig=btn.textContent;
   btn.style.display='none';
 
   const pad=24;
@@ -828,7 +827,8 @@ function downloadJPG(){
   wrapper.style.cssText=`position:fixed;left:-9999px;top:0;background:#f5f0e8;padding:${pad}px;width:${target.offsetWidth+pad*2}px;font-family:'DM Sans',sans-serif;`;
   const clone=target.cloneNode(true);
   clone.style.cssText='display:block;';
-  clone.querySelector('#dl-btn') && (clone.querySelector('#dl-btn').style.display='none');
+  const cloneBtn=clone.querySelector('#dl-btn');
+  if(cloneBtn) cloneBtn.style.display='none';
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
@@ -840,15 +840,45 @@ function downloadJPG(){
   }).then(canvas=>{
     document.body.removeChild(wrapper);
     btn.style.display='';
-    const link=document.createElement('a');
     const title=(document.getElementById('result-title').textContent||'結算').replace(/\s+/g,'_');
-    link.download=`PURE_DIVE_${title}.jpg`;
-    link.href=canvas.toDataURL('image/jpeg',0.95);
-    link.click();
+    const dataURL=canvas.toDataURL('image/jpeg',0.95);
+
+    // 偵測 iOS / Android
+    const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid=/android/i.test(navigator.userAgent);
+
+    if(isIOS){
+      // iOS Safari: 在新分頁開啟圖片，使用者長按儲存
+      const win=window.open('','_blank');
+      if(win){
+        win.document.write(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>結算圖片</title></head><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh"><p style="color:white;font-family:sans-serif;font-size:16px;margin-bottom:12px;text-align:center">長按圖片 → 儲存到相片</p><img src="${dataURL}" style="max-width:100%;height:auto;display:block"></body></html>`);
+        win.document.close();
+      } else {
+        // popup blocked，fallback: 顯示 modal
+        showImgModal(dataURL);
+      }
+    } else {
+      // Android / Desktop: 直接下載
+      const link=document.createElement('a');
+      link.download=`PURE_DIVE_${title}.jpg`;
+      link.href=dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }).catch(()=>{
     document.body.removeChild(wrapper);
     btn.style.display='';
   });
+}
+
+function showImgModal(dataURL){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<p style="color:white;font-family:sans-serif;font-size:16px;margin-bottom:14px;text-align:center">長按圖片 → 儲存到相片</p>
+    <img src="${dataURL}" style="max-width:100%;max-height:75vh;border-radius:8px;display:block">
+    <button onclick="this.parentElement.remove()" style="margin-top:16px;padding:10px 28px;border-radius:8px;border:none;background:white;font-size:15px;cursor:pointer">關閉</button>`;
+  document.body.appendChild(overlay);
 }
 </script>
 -e 
